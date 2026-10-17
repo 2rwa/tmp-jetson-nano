@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Jetson Nano 4GB × Ubuntu 24.04 mainline Linux / Nouveau 実験の進捗とドキュメント">
+<title>Jetson Nano — Mainline Lab</title>
+<link rel="stylesheet" href="site.css"><script defer src="site.js"></script>
+</head>
+<body>
+<header class="top"><a class="logo" href="./"><span class="led"></span>JETSON / MAINLINE LAB</a><nav>
+<a href="#build">BUILD</a><a href="#images">IMAGES</a><a href="#validation">VALIDATION</a><a href="#docs">DOCS</a>
+<a href="https://github.com/2rwa/tmp-jetson-nano">GITHUB ↗</a>
+</nav></header>
+<main>
+<section class="hero">
+<p class="overline">EXPERIMENTAL / ARM64 / ORIGINAL 4GB</p>
+<h1>Modern Linux.<br><em>Old Jetson Nano.</em></h1>
+<p class="lead">初代Jetson Nano 4GBをUbuntu 24.04とメインラインLinuxで動かす実験。Nouveau・Mesa・WebGL・WPE WebKitのGPU描画まで、段階的に調べます。</p>
+<div class="tags"><span>Ubuntu <strong>24.04 Noble</strong></span><span>Kernel <strong>Armbian current</strong></span><span>GPU <strong>Maxwell / Nouveau</strong></span></div>
+<p class="caution"><b>!</b> ビルド成功 ≠ 実機起動成功 ≠ GPU成功。イメージは検証用であり、64GBのSDカードに書く前に既存データをバックアップしてください。</p>
+</section>
+<section class="section" id="build">
+<div class="heading"><div><p class="overline">01 / LIVE CI</p><h2>Build status</h2></div><div class="tools"><small id="fetched-at">読み込み前</small><button id="refresh" type="button">↻ 再取得</button></div></div>
+<div class="cols">
+<article class="panel emphasis">
+<p class="micro">LATEST IMAGE BUILD</p>
+<h3 id="latest-state" class="large-status" aria-live="polite">GitHubから取得中…</h3>
+<p id="latest-title" class="muted">Ubuntu 24.04 / ARM64</p>
+<dl class="metrics"><div><dt>Run</dt><dd id="latest-run">—</dd></div><div><dt>開始</dt><dd id="latest-date">—</dd></div><div><dt>進行中の工程</dt><dd id="latest-step">—</dd></div></dl>
+<a id="latest-link" class="action" href="https://github.com/2rwa/tmp-jetson-nano/actions/workflows/build.yml">ビルドログを開く ↗</a>
+</article>
+<article class="panel">
+<p class="micro">PIPELINE STEPS</p>
+<ol id="build-steps" class="steps"><li>ディスク空き容量確保</li><li>Armbian取得と準備</li><li>カーネル・rootfs・SDイメージ</li><li>整合性検査</li><li>Release公開</li></ol>
+<p class="muted small">現在のGitHub Actionsジョブから工程ごとの結果を取得します。</p>
+</article>
+</div>
+<div class="panel below"><p class="micro">RECENT IMAGE BUILD RUNS</p><div id="recent-runs" class="recent">読み込み中…</div></div>
+<p id="fetch-error" class="error" hidden>APIの取得に失敗しました。<a href="https://github.com/2rwa/tmp-jetson-nano/actions">Actionsで直接確認 ↗</a></p>
+</section>
+<section id="images" class="section">
+<div class="heading"><div><p class="overline">02 / RELEASE ASSETS</p><h2>SD card images</h2></div><a class="action" href="https://github.com/2rwa/tmp-jetson-nano/releases">すべてのReleases ↗</a></div>
+<div class="panel"><p class="muted">完成した <code>.img.xz</code> はGitHub Releasesに保存します。SHA256を照合し、別のSDカードで試してください。ここには公開済みのイメージだけが表示されます。</p>
+<div id="release-list" class="release-list">読み込み中…</div></div>
+</section>
+<section id="validation" class="section">
+<div class="heading"><div><p class="overline">03 / PHYSICAL TEST</p><h2>Validation roadmap</h2></div></div>
+<div class="grid">
+<article class="milestone"><span class="number">01</span><span class="unknown">未確認</span><h3>SD image</h3><p>最小rootfs・DTB・圧縮イメージを生成。CI結果は上のBuildで確認。</p></article>
+<article class="milestone"><span class="number">02</span><span class="unknown">未確認</span><h3>UART / boot</h3><p>実機のカーネル起動、rootfsのマウント、ログインを確認。</p></article>
+<article class="milestone"><span class="number">03</span><span class="unknown">未確認</span><h3>DRM / HDMI</h3><p>ディスプレイ出力を検証。先行Armbian 26ではHDMI未動作。</p></article>
+<article class="milestone"><span class="number">04</span><span class="unknown">未確認</span><h3>Nouveau / Mesa</h3><p>ハードウェア描画、GPUクロック、ドライバを実測。</p></article>
+<article class="milestone"><span class="number">05</span><span class="unknown">未確認</span><h3>WebGL / WPE</h3><p>GLES、WebGL、WPE WebKitでGPU利用・FPSを比較。</p></article>
+</div>
+<p class="caution subtle">実機検証の状態は手動で記録します。APIのビルド成功が自動的に「GPU成功」へ変わることはありません。</p>
+</section>
+<section id="docs" class="section">
+<div class="heading"><div><p class="overline">04 / ENGINEERING NOTES</p><h2>Documentation</h2></div></div>
+<div class="docgrid">
+<a class="doc" href="https://github.com/2rwa/tmp-jetson-nano/blob/main/docs/BUILD-NOTES.md"><small>ARCHITECTURE / 01</small><h3>ビルド構成・容量 ↗</h3><p>ARM64バイナリパッケージ、Nouveau、ArmbianとActionsの制約。</p></a>
+<a class="doc" href="https://github.com/2rwa/tmp-jetson-nano/blob/main/docs/BOOT-TEST.md"><small>VALIDATION / 02</small><h3>実機起動手順 ↗</h3><p>SDカード、UART、HDMI、GPU診断と確認基準。</p></a>
+<a class="doc" href="https://github.com/2rwa/tmp-jetson-nano/blob/main/docs/PLAN.md"><small>ROADMAP / 03</small><h3>進捗と未解決事項 ↗</h3><p>各段階の完了条件と先行実装で判明した問題。</p></a>
+</div>
+</section>
+</main>
+<footer><span>UNOFFICIAL / JETSON NANO 4GB</span><span>Not endorsed by NVIDIA or Armbian</span><a href="https://github.com/2rwa/tmp-jetson-nano">GitHub ↗</a></footer>
+</body>
+</html>

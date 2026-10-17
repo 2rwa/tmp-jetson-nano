@@ -1,41 +1,35 @@
 # tmp-jetson-nano
 
-Experimental **original NVIDIA Jetson Nano 4GB** build: Ubuntu 24.04 (Noble) userspace, modern mainline Linux from Armbian, and a future Nouveau/Mesa GPU validation track.
+初代 **NVIDIA Jetson Nano Developer Kit 4GB** で **Ubuntu 24.04 Noble + メインラインLinux + Nouveau/Mesa** を試すための一時実験リポジトリです。
 
-This repository is a **build-and-boot experiment**, not a ready-to-use official Jetson image. NVIDIA JetPack 4.6.x uses an old vendor kernel; this experiment deliberately does **not** bring over NVIDIA's proprietary CUDA/L4T driver stack.
+**[📈 実験ダッシュボード (GitHub Pages)](https://2rwa.github.io/tmp-jetson-nano/)**  
+[GitHub Actions](https://github.com/2rwa/tmp-jetson-nano/actions/workflows/build.yml) · [実験イメージ (Releases)](https://github.com/2rwa/tmp-jetson-nano/releases)
 
-## Current milestone
+## 現状と前提
 
-1. Build an ARM64 **minimal/headless** Ubuntu 24.04 image using GitHub Actions.
-2. Validate the compressed image and publish it in [Releases](../../releases) (experimental prerelease).
-3. On a spare microSD card, boot the original 4GB board and collect UART logs.
-4. Resolve board-specific DTB/HDMI/USB/Ethernet issues.
-5. Only after boot/display are stable: enable and measure Nouveau/Mesa, DRM/KMS, GLES/WebGL, and WPE WebKit.
+- GitHub ActionsでARM64のMinimal Ubuntu 24.04イメージをビルドするワークフローを用意。
+- ビルド結果はPagesに表示。実機起動・HDMI・GPU描画は**未検証**。
+- ArmbianのJetson Nano定義はサポート終了扱い \`jetson-nano.eos\`。イメージが作れても起動するとは限りません。
+- 使用予定の64GB microSDには既存データがあるため、書き込む前にバックアップ。
+- 同系列の実験にDebian Trixie / Linux 6.18.29でUART起動できた例があるが、HDMI未動作。これはUbuntu Nobleの起動実績ではありません。
+- NVIDIA JetPack旧ドライバ/CUDAと、メインラインNouveauは別経路。GPU動作判定まで混ぜない。
 
-**Build success is not boot success.** The upstream Armbian board definition is `jetson-nano.eos` (end-of-support / experimental). Prior community success with Armbian 26 / Linux 6.18 was **Debian Trixie, headless, with a manual DTB change**, not Ubuntu 24.04 GPU acceleration.
+## 技術資料
 
-## GitHub Actions
+- [アーキテクチャ、ビルド要件、容量とGPUの境界](docs/BUILD-NOTES.md)
+- [SD書き込み、UART、GPU実機試験](docs/BOOT-TEST.md)
+- [段階的な検証計画と判定基準](docs/PLAN.md)
+- [イメージ構築ワークフロー](.github/workflows/build.yml)
+- [Pages公開ワークフロー](.github/workflows/pages.yml)
 
-- [Build workflow](.github/workflows/build.yml)
-- [Actions runs](../../actions/workflows/build.yml)
-- [Experimental image releases](../../releases)
-- [Boot / GPU test checklist](docs/BOOT-TEST.md)
+## Pagesの運用
 
-A change to the workflow or `userpatches/` starts an Ubuntu 24.04 build. **Run workflow** can also select Debian Trixie as a known community-reference userspace.
+GitHub Actions配信設定なら \`pages.yml\` が \`docs/\` をデプロイします。ブランチ配信 (main /docs) でも \`docs/index.html\` を直接表示可能です。main /(root) 配信ならルート \`index.html\` が \`docs/\` へ案内します。
 
-The build uses standard `ubuntu-latest` runners and frees disk space before building. The source build framework is `armbian/build` (currently main, record SHA in each run). Outputs are `.img.xz` plus SHA256SUMS.txt uploaded to GitHub Releases; failure diagnostics are saved as Actions artifacts. Nothing gets flashed automatically.
+Pagesは公開GitHub APIから最新ActionsとReleasesを読み込んで表示を更新します（表示中90秒ごと＋更新ボタン）。**自動で更新されるのはCIとReleaseの状態だけ**。実機GPUの検証結果は実測後に文書を更新します。
 
-## Hardware assumptions
+## 参考
 
-- **Target**: original Jetson Nano **4GB** Developer Kit; A02/B01 revision to be verified.
-- **Storage**: an **additional / backed-up** microSD; an available 64 GB card is sufficient for the image size, but **64 GB of space on the card does not increase Actions runner disk space**.
-- **Boot diagnostics**: 115200 bps serial console (UART), ideally a USB-to-TTL **3.3V** adapter; SSH may not work until networking is configured.
-- NVIDIA proprietary drivers, CUDA and Vulkan on the vendor stack are **not included** in this mainline experiment.
-
-## Sources
-
-- [Community Action and Jetson Nano notes](https://github.com/hillac/jetson-nano-armbian-build)
 - [Armbian build framework](https://github.com/armbian/build)
-- [Armbian build requirements](https://docs.armbian.com/build-framework/getting-started/)
-
-Do not treat upstream's `venc` DTB workaround as universally valid on every kernel / hardware revision; follow the recorded boot log and preserve the original DTB.
+- [Jetson Nano向けArmbian Actions先行事例](https://github.com/hillac/jetson-nano-armbian-build)
+- [Linux 6.18.29実機起動の注意点](https://github.com/hillac/jetson-nano-armbian-build/blob/main/jetson-armbian-26.md)
