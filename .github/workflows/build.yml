@@ -1,0 +1,149 @@
+name: Jetson Nano Ubuntu 24.04 (mainline experiment)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build.yml"
+      - "userpatches/**"
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Linux userspace (noble = Ubuntu 24.04, trixie = Debian baseline)"
+        type: choice
+        required: true
+        default: noble
+        options:
+          - noble
+          - trixie
+
+permissions:
+  contents: write
+
+concurrency:
+  group: jetson-nano-image
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Jetson Nano / ${{ inputs.release || 'noble' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      DISTRO: ${{ inputs.release || 'noble' }}
+    steps:
+      - name: System resources before cleanup
+        run: |
+          free -h
+          df -h
+          nproc
+
+      # The same cleanup action used by Armbian's official GitHub Action.
+      - name: Free build disk space
+        uses: descriptinc/free-disk-space@1b4b157593c6801212a2ed488c205e0a810b4592
+        with:
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Checkout experiment configuration
+        uses: actions/checkout@v4
+        with:
+          path: custom
+
+      - name: Checkout Armbian build framework
+        uses: actions/checkout@v4
+        with:
+          repository: armbian/build
+          ref: main
+          path: armbian
+
+      - name: Record versions and available disk
+        run: |
+          echo "Armbian framework: $(git -C armbian rev-parse HEAD)"
+          echo "Target board: jetson-nano (EOS/experimental upstream)"
+          echo "Userspace: $DISTRO"
+          df -h
+          test -f armbian/config/boards/jetson-nano.eos
+          sed -n '1,80p' armbian/config/boards/jetson-nano.eos
+
+      - name: Prepare Armbian host and userpatches
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd armbian
+          sudo ./compile.sh requirements
+          sudo chown -R "$USER:$USER" .
+          if [ -d ../custom/userpatches ]; then
+            mkdir -p userpatches
+            cp -a ../custom/userpatches/. userpatches/
+          fi
+          df -h
+
+      - name: Build minimal ARM64 SD-card image
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd armbian
+          ./compile.sh build \
+            BOARD=jetson-nano \
+            BRANCH=current \
+            RELEASE="$DISTRO" \
+            BUILD_DESKTOP=no \
+            BUILD_MINIMAL=yes \
+            KERNEL_CONFIGURE=no \
+            KERNEL_BTF=no \
+            COMPRESS_OUTPUTIMAGE=sha,img,xz \
+            EXPERT=yes
+          df -h
+
+      - name: Validate and checksum image
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd armbian/output/images
+          shopt -s nullglob
+          images=(*.img.xz)
+          if (( ${#images[@]} == 0 )); then
+            echo "::error::No .img.xz image was produced"
+            ls -lh
+            exit 1
+          fi
+          for img in "${images[@]}"; do
+            test -s "$img"
+            xz -t "$img"
+          done
+          sha256sum "${images[@]}" > SHA256SUMS.txt
+          ls -lh
+
+      - name: Upload diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: armbian-logs-${{ github.run_number }}
+          path: |
+            armbian/output/logs/
+            armbian/output/info/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Publish experimental SD image
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: nano-${{ env.DISTRO }}-run-${{ github.run_number }}
+          name: "Jetson Nano ${{ env.DISTRO }} — experimental #${{ github.run_number }}"
+          commit: ${{ github.sha }}
+          prerelease: true
+          makeLatest: false
+          allowUpdates: false
+          artifacts: "armbian/output/images/*.img.xz,armbian/output/images/SHA256SUMS.txt"
+          artifactErrorsFailBuild: true
+          body: |
+            Unofficial experimental image for original Jetson Nano 4GB.
+            Target: ${{ env.DISTRO }} userspace + Armbian mainline/current kernel.
+            NOT validated on physical hardware. HDMI, Nouveau, Wi-Fi and GPU acceleration are unverified.
+            See README and docs/BOOT-TEST.md before flashing. Back up existing microSD card first.
