@@ -14,9 +14,9 @@
 
 1. GitHub標準 ubuntu-latest ランナーでディスク空き容量確保。
 2. Armbianビルドフレームワークを取得。現時点の上流ボード定義は **config/boards/jetson-nano.eos**（EOS = サポート終了扱い）。
-3. \`./compile.sh requirements\` でビルド依存ツールをセットアップ。
-4. \`BOARD=jetson-nano BRANCH=current RELEASE=noble BUILD_MINIMAL=yes\` でイメージ構築。
-5. 圧縮イメージの \`xz -t\` と \`sha256sum\` を検証。
+3. `./compile.sh requirements` でビルド依存ツールをセットアップ。
+4. `BOARD=jetson-nano BRANCH=current RELEASE=noble BUILD_MINIMAL=yes` でイメージ構築。
+5. 圧縮イメージの `xz -t` と `sha256sum` を検証。
 6. 実験用pre-releaseに公開。CIログはActions artifact（保存期限あり）。
 
 CIは **ビルドとファイル整合性** のテスト。実機起動・HDMI・GPU性能を保証しない。
@@ -47,7 +47,7 @@ Armbian公式は2026-02にJetson Nanoの自動イメージを「起動しない�
 ## 参照
 
 - [Armbian build](https://github.com/armbian/build)
-- [Armbian Jetson Nano実験例 (h illa c)](https://github.com/hillac/jetson-nano-armbian-build)
+- [Armbian Jetson Nano実験例 (hillac)](https://github.com/hillac/jetson-nano-armbian-build)
 - [Armbian 26起動レポート](https://github.com/hillac/jetson-nano-armbian-build/blob/main/jetson-armbian-26.md)
 - [ArmbianボードのEOS化](https://github.com/armbian/build/commit/f76c7625165c88a9dd4701d0880b405b94deaf12)
 - [GitHub Actions](../.github/workflows/build.yml)
