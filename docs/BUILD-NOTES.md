@@ -34,6 +34,28 @@ CIは **ビルドとファイル整合性** のテスト。実機起動・HDMI�
 
 Armbian公式は2026-02にJetson Nanoの自動イメージを「起動しない」としてEOSへ移した。ビルドが通っても特定ボードで起動しない場合がある。先行のArmbian 26.2.7 / Debian Trixie / Linux 6.18.29 / Nano A02 はUSB起動・UARTログインに成功、HDMIは未動作。さらにvencノードのreset依存をDTBで修正している。**同じ数値のphandleを異なるDTBに盲目的に適用しないこと。**
 
+
+## HDMI状況・初回ビルドの制約（2026-10-18）
+
+**Ubuntu 24.04の初回イメージではHDMIが映らない可能性が高い。ただし、画面が黒いだけではドライバ不具合とは確定できない。**
+
+- ArmbianのARM64 current設定は **CONFIG_DRM_TEGRA=m** と **CONFIG_DRM_NOUVEAU=m**。カーネルはモジュールとして両ドライバをビルドする設定だが、今回のイメージ内の実際のモジュール有無と初期化状況は未検証。
+- Jetson NanoのメインラインLinuxデバイスツリーにはHDMI向け **sor@54580000** があり、**status = "okay"**。HDMI電源・DDC/HPDの指定もあるが、実機動作を保証しない。
+- Armbianのボード定義のカーネル引数は **console=ttyS0,115200n8**（シリアル指定）。今回のイメージは **BUILD_MINIMAL=yes** なのでGUIなし。HDMIに文字が出ないこととHDMIハードウェア故障は別問題。
+- Armbian 26.2.7 / Linux 6.18.29の先行例は、vencのDTB修正後にUARTログイン成功したがHDMI未動作。同じ原因が今回に当てはまるかは不明。
+- メインラインのdrm/tegraはTegra210 HDMIをサポートするが、HDMI 2.0のサポートは未マージと公式資料に記載。初回は1080p60以下、可能なら720p60から試し、4K60を避ける。
+
+**実機のUARTから優先確認する項目**
+
+1. uname -r と /proc/cmdline（カーネル版・コンソール引数）
+2. lsmod と modprobe tegra-drm（ドライバの存在・ロード）
+3. /dev/dri と /sys/class/drm/card*-*/status（KMSとHDMI接続）
+4. dmesgの tegra / sor / hdmi / drm / edid / host1x 関連のエラー
+5. modetest -M tegra -c （libdrm-testsなどを導入できる場合）
+6. 必要なら次ビルドで **console=tty0 console=ttyS0,115200n8**、モニターEDID/低解像度の固定を実験する。
+
+参考: [Linux drm/tegra](https://www.kernel.org/doc/html/latest/gpu/tegra.html) / [Nanoデバイスツリー](https://github.com/torvalds/linux/blob/master/arch/arm64/boot/dts/nvidia/tegra210-p3450-0000.dts) / [Armbianカーネル設定](https://github.com/armbian/build/blob/main/config/kernel/linux-uefi-arm64-current.config) / [ボード定義](https://github.com/armbian/build/blob/main/config/boards/jetson-nano.eos)
+
 ## GPUの判定
 
 1. Nouveauのカーネル初期化が完了するか（dmesg / ドライバ / firmware）。
