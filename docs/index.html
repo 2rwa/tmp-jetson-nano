@@ -39,6 +39,13 @@
 <div class="panel below"><p class="micro">RECENT IMAGE BUILD RUNS</p><div id="recent-runs" class="recent">読み込み中…</div></div>
 <p id="fetch-error" class="error" hidden>APIの取得に失敗しました。<a href="https://github.com/2rwa/tmp-jetson-nano/actions">Actionsで直接確認 ↗</a></p>
 </section>
+<section id="qemu" class="section">
+<div class="heading"><div><p class="overline">01.5 / VIRTUAL ARM64 BOOT</p><h2>QEMU boot: PASS</h2></div><a class="action" href="https://github.com/2rwa/tmp-jetson-nano/actions/runs/39080262634">Run #2 ↗</a></div>
+<div class="panel"><p class="micro">UBUNTU 24.04 / LINUX 6.18.57 / QEMU VIRT</p>
+<h3>Reached multi-user.target &amp; login prompt</h3>
+<p class="muted">公開済みSDイメージからカーネル・initramfs・ext4 rootfsを取り出し、ARM64のQEMU virt基板でLinux起動に成功。systemdと初回ログイン画面を確認しました。JetsonのTegra210、NIC、HDMI、GPUをエミュレートした結果ではありません。</p>
+<p><a class="action" href="https://github.com/2rwa/tmp-jetson-nano/blob/main/docs/QEMU-RESULT-002.md">シリアルログと判定の詳細 ↗</a></p></div>
+</section>
 <section id="images" class="section">
 <div class="heading"><div><p class="overline">02 / RELEASE ASSETS</p><h2>SD card images</h2></div><a class="action" href="https://github.com/2rwa/tmp-jetson-nano/releases">すべてのReleases ↗</a></div>
 <div class="panel"><p class="muted">完成した <code>.img.xz</code> はGitHub Releasesに保存します。SHA256を照合し、別のSDカードで試してください。ここには公開済みのイメージだけが表示されます。</p>

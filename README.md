@@ -13,6 +13,13 @@
 - [ビルド実行ログ（Actions #1）](https://github.com/2rwa/tmp-jetson-nano/actions/runs/39047832630)
 - [Build #1詳細・次の検証作業](docs/BUILD-RESULT-001.md)
 
+## QEMU仮想起動テスト — 成功（2026-10-18）
+
+**[Run #2](https://github.com/2rwa/tmp-jetson-nano/actions/runs/39080262634) で、ReleaseのLinux 6.18.57 + Ubuntu 24.04 rootfsがARM64 QEMU virt上で起動し、systemdのmulti-user.targetとログイン画面まで到達しました。** これは汎用仮想基板での検証であり、Jetson Nano実機のDTB、NIC、HDMI、GPUは未検証です。初回セットアップはコンソールからEnterを促す画面を確認しました。
+
+- [QEMU成功レポート](docs/QEMU-RESULT-002.md)
+- [QEMUスモークテスト](https://github.com/2rwa/tmp-jetson-nano/actions/workflows/qemu-boot.yml)
+
 ## 現状と前提
 
 - GitHub ActionsでARM64のMinimal Ubuntu 24.04イメージを**ビルド成功**。上記Releaseで配布中。

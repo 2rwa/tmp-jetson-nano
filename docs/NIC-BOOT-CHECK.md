@@ -23,6 +23,10 @@
 
 **注意:** 先行事例のArmbian 26.2.7はDebian Trixie + **Server**（NetworkManager）であり、手動の `nmcli` 設定を使っている。**今回のUbuntu 24.04 Minimalはsystemd-networkd/Netplan** なので、同じ `nmcli` 手順はそのまま使えない。
 
+## QEMU実行で判明した初回ログイン手順
+
+[QEMU #2](QEMU-RESULT-002.md) では `jetson-nano login: root (automatic login)` に続いて `Press Enter to start the first login setup on this console.` と表示された。**ネットワーク経由でpingが応答しても、SSHにログインできるとは限らない。** 初回セットアップをコンソールで完了する必要がある可能性があるため、SSH不通だけで起動失敗とはしない。
+
 ## UARTなしの起動確認（最初にこれを試す）
 
 1. Jetson Nanoを有線LANで家庭内のルーターかスイッチへ接続し、電源を入れる。まず電源安定性・SDカードからの起動を確認。

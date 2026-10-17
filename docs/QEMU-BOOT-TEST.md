@@ -44,3 +44,5 @@ Actionsから「QEMU ARM64 boot smoke test」 → **Run workflow** → `release_
 ## 実行履歴
 
 - [Run #1](https://github.com/2rwa/tmp-jetson-nano/actions/runs/39080088095): アーカイブのダウンロード、SHA256一致、GPTを確認。GitHub ARMランナー上ではループデバイスのFSTYPE/LABELが空だったため、rootfs検出で終了。**QEMUはまだ起動しておらず、Linux起動失敗ではない。** GPTの `rootfs` パーティション名から番号を取得する方法へ修正し再実行。
+
+- [Run #2](https://github.com/2rwa/tmp-jetson-nano/actions/runs/39080262634): **PASS**。GPTを直接読んでext4 rootfsをマウント、カーネルとinitrdを抽出。QEMU ARM64 virtでLinux起動、multi-user.target、jetson-nano loginまで到達。[結果とログの詳細](QEMU-RESULT-002.md)。実機用DTBと物理NIC/HDMI/GPUは試していない。

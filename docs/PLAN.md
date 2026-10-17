@@ -25,6 +25,7 @@
 
 ## QEMUスモークテスト
 
+- **2026-10-18: [QEMU起動テスト #2 成功](QEMU-RESULT-002.md)。** Ubuntu 24.04 + Linux 6.18.57の同一Releaseイメージからrootfsをマウントし、systemd multi-user.targetと初回ログイン画面に到達。
 - 既存ReleaseをARM64のQEMU virtマシン上で起動する独立ジョブを追加。検証対象はLinuxカーネル・initramfs・rootfsで、**Jetson NanoのBootROM/DTB/NIC/HDMI/GPUをエミュレートしない**。
 - 判定結果は[QEMUのActions](https://github.com/2rwa/tmp-jetson-nano/actions/workflows/qemu-boot.yml)と診断artifactで確認する。詳細は[QEMUブートテスト](QEMU-BOOT-TEST.md)。
 
