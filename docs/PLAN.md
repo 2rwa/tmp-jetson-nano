@@ -23,6 +23,11 @@
 - HDMI・Nouveau GPU・WebGLは未検証。完了扱いにしない。
 - [Build #1実測記録](BUILD-RESULT-001.md)
 
+## QEMUスモークテスト
+
+- 既存ReleaseをARM64のQEMU virtマシン上で起動する独立ジョブを追加。検証対象はLinuxカーネル・initramfs・rootfsで、**Jetson NanoのBootROM/DTB/NIC/HDMI/GPUをエミュレートしない**。
+- 判定結果は[QEMUのActions](https://github.com/2rwa/tmp-jetson-nano/actions/workflows/qemu-boot.yml)と診断artifactで確認する。詳細は[QEMUブートテスト](QEMU-BOOT-TEST.md)。
+
 ## 現在の方針
 
 - 最初はArmbianの \`BOARD=jetson-nano BRANCH=current RELEASE=noble BUILD_MINIMAL=yes\`。

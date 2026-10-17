@@ -1,0 +1,103 @@
+name: QEMU ARM64 boot smoke test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/qemu-boot.yml
+      - scripts/qemu-boot-smoke.sh
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing image Release tag to test
+        required: true
+        type: string
+        default: nano-noble-run-1
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qemu-boot-${{ github.event.inputs.release_tag || 'nano-noble-run-1' }}
+  cancel-in-progress: false
+
+jobs:
+  qemu:
+    name: Boot released Nano kernel/rootfs on QEMU virt ARM64
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.release_tag || 'nano-noble-run-1' }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inspect ARM runner
+        run: |
+          uname -a
+          uname -m
+          df -h
+          free -h
+          if test -e /dev/kvm; then ls -l /dev/kvm; else echo 'KVM device unavailable; use QEMU TCG'; fi
+
+      - name: Install ARM64 QEMU tools
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            qemu-system-arm qemu-utils file util-linux xz-utils jq
+          qemu-system-aarch64 --version
+          gh --version
+          bash -n scripts/qemu-boot-smoke.sh
+
+      - name: Download original release image and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p image
+          gh release download "$RELEASE_TAG" -R "$GITHUB_REPOSITORY" \
+            --pattern '*.img.xz' --pattern 'SHA256SUMS.txt' --dir image
+          (cd image && sha256sum -c SHA256SUMS.txt)
+          ls -lh image/
+          df -h
+
+      - name: Boot full image using QEMU virt DTB and direct kernel
+        id: smoke
+        shell: bash
+        run: bash scripts/qemu-boot-smoke.sh
+
+      - name: Record summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## QEMU ARM64 boot smoke test'
+            echo
+            echo "Release: \`$RELEASE_TAG\`"
+            echo "Status: \`${{ steps.smoke.outcome }}\`"
+            echo
+            echo 'This boots the Nano image root filesystem and kernel on **QEMU virt**, with a QEMU-generated DTB.'
+            echo 'It does **NOT** test Jetson Nano boot firmware, original DTB, PCIe NIC, HDMI, or Nouveau GPU.'
+            echo
+            if test -f result/qemu-boot-result.txt; then
+              echo '### Test details'
+              echo '~~~'
+              cat result/qemu-boot-result.txt
+              echo '~~~'
+            fi
+            if test -f result/guest-highlights.txt; then
+              echo '### Selected serial output'
+              echo '~~~'
+              tail -n 45 result/guest-highlights.txt
+              echo '~~~'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jetson-qemu-boot-${{ github.run_number }}
+          path: |
+            result/
+          retention-days: 30
+          if-no-files-found: warn
