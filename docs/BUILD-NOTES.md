@@ -19,6 +19,8 @@
 5. 圧縮イメージの `xz -t` と `sha256sum` を検証。
 6. 実験用pre-releaseに公開。CIログはActions artifact（保存期限あり）。
 
+**初回実績（2026-10-18）**: [Actions #1 成功](https://github.com/2rwa/tmp-jetson-nano/actions/runs/39047832630) / [Release nano-noble-run-1](https://github.com/2rwa/tmp-jetson-nano/releases/tag/nano-noble-run-1)。Ubuntu Noble Minimal + Linux 6.18.57。画像とgzipではなくXZの整合性検査まで成功。実機は未検証。
+
 CIは **ビルドとファイル整合性** のテスト。実機起動・HDMI・GPU性能を保証しない。
 
 ## メモリ・容量
@@ -26,7 +28,7 @@ CIは **ビルドとファイル整合性** のテスト。実機起動・HDMI�
 - Armbian公式推奨: RAM 8GB以上、ディスク空き容量おおむね50GB。
 - GitHub Actions標準Linuxランナー: RAM 16GB、初期ディスクは数十GB未満の場合がある。ワークフローでランナー不要データを削除する。
 - rootfs内の一般的なUbuntuプログラムはコンパイル済み **ARM64パッケージ**を用いる。全パッケージをローカルビルドするわけではない。
-- 圧縮Releaseイメージは先行事例で約1.2〜1.4GBだったが、Nobleについてのサイズは実測前。
+- **初回のNobleイメージの実測は1,100,928,004 bytes（約1.10GB / 1.03GiB）**。ビルドログ上の圧縮前イメージは約4.9GB。詳細は [Build #1](BUILD-RESULT-001.md)。
 - 実機64GB microSDの容量と、CIランナーのビルド作業用ディスク容量は別。GitHub Releaseは**個別ファイル2GiB未満**制限があるため、超過時は分割や縮小方式を検討。
 - Armbianのキャッシュは条件により再利用できるが、常にキャッシュヒットするとは限らない。
 

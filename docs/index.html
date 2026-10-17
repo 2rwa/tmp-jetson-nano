@@ -47,7 +47,7 @@
 <section id="validation" class="section">
 <div class="heading"><div><p class="overline">03 / PHYSICAL TEST</p><h2>Validation roadmap</h2></div></div>
 <div class="grid">
-<article class="milestone"><span class="number">01</span><span class="unknown">未確認</span><h3>SD image</h3><p>最小rootfs・DTB・圧縮イメージを生成。CI結果は上のBuildで確認。</p></article>
+<article class="milestone"><span class="number">01</span><span class="unknown">CI成功</span><h3>SD image</h3><p>Ubuntu 24.04とLinux 6.18.57のイメージを生成。xz検査・SHA256作成・Release公開まで完了（実機起動は別判定）。</p></article>
 <article class="milestone"><span class="number">02</span><span class="unknown">未確認</span><h3>UART / boot</h3><p>実機のカーネル起動、rootfsのマウント、ログインを確認。</p></article>
 <article class="milestone"><span class="number">03</span><span class="unknown">未確認</span><h3>DRM / HDMI</h3><p>ディスプレイ出力を検証。先行Armbian 26ではHDMI未動作。</p></article>
 <article class="milestone"><span class="number">04</span><span class="unknown">未確認</span><h3>Nouveau / Mesa</h3><p>ハードウェア描画、GPUクロック、ドライバを実測。</p></article>
@@ -58,6 +58,7 @@
 <section id="docs" class="section">
 <div class="heading"><div><p class="overline">04 / ENGINEERING NOTES</p><h2>Documentation</h2></div></div>
 <div class="docgrid">
+<a class="doc" href="https://github.com/2rwa/tmp-jetson-nano/blob/main/docs/BUILD-RESULT-001.md"><small>BUILD REPORT / 01</small><h3>初回ビルド成功記録 ↗</h3><p>Linux 6.18.57、1.10GBのSDイメージ、次の実機検証項目。</p></a>
 <a class="doc" href="https://github.com/2rwa/tmp-jetson-nano/blob/main/docs/RPI3-UART.md"><small>HARDWARE / 00</small><h3>Raspberry Pi 3 UART接続 ↗</h3><p>GPIO14/15、Jetson A02/B01ピン配列、115200bpsログ採取。</p></a>
 <a class="doc" href="https://github.com/2rwa/tmp-jetson-nano/blob/main/docs/BUILD-NOTES.md"><small>ARCHITECTURE / 01</small><h3>ビルド構成・容量 ↗</h3><p>ARM64バイナリパッケージ、Nouveau、ArmbianとActionsの制約。</p></a>
 <a class="doc" href="https://github.com/2rwa/tmp-jetson-nano/blob/main/docs/BOOT-TEST.md"><small>VALIDATION / 02</small><h3>実機起動手順 ↗</h3><p>SDカード、UART、HDMI、GPU診断と確認基準。</p></a>

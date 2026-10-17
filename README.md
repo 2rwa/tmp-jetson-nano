@@ -5,9 +5,17 @@
 **[📈 実験ダッシュボード (GitHub Pages)](https://2rwa.github.io/tmp-jetson-nano/)**  
 [GitHub Actions](https://github.com/2rwa/tmp-jetson-nano/actions/workflows/build.yml) · [実験イメージ (Releases)](https://github.com/2rwa/tmp-jetson-nano/releases)
 
+## 初回ビルド結果（2026-10-18）
+
+**GitHub Actions #1 成功、Ubuntu 24.04 Noble + Linux 6.18.57 のSDイメージを公開済みです。** 圧縮後 **1,100,928,004 bytes（約1.10GB）**、展開前のイメージはビルドログ上 **約4.9GB**。実機起動・HDMI・GPUは未検証です。
+
+- **[初回イメージを取得（Release）](https://github.com/2rwa/tmp-jetson-nano/releases/tag/nano-noble-run-1)**
+- [ビルド実行ログ（Actions #1）](https://github.com/2rwa/tmp-jetson-nano/actions/runs/39047832630)
+- [Build #1詳細・次の検証作業](docs/BUILD-RESULT-001.md)
+
 ## 現状と前提
 
-- GitHub ActionsでARM64のMinimal Ubuntu 24.04イメージをビルドするワークフローを用意。
+- GitHub ActionsでARM64のMinimal Ubuntu 24.04イメージを**ビルド成功**。上記Releaseで配布中。
 - ビルド結果はPagesに表示。実機起動・HDMI・GPU描画は**未検証**。
 - ArmbianのJetson Nano定義はサポート終了扱い `jetson-nano.eos`。イメージが作れても起動するとは限りません。
 - 使用予定の64GB microSDには既存データがあるため、書き込む前にバックアップ。

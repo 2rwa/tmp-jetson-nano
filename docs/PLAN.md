@@ -6,7 +6,7 @@
 
 | 段階 | CIで確認できる内容 | 実機必須の内容 | 判定 |
 |---|---|---|---|
-| A. image | kernel/rootfs/image生成、xz・SHA256 | なし | Actions参照 |
+| A. image | kernel/rootfs/image生成、xz・SHA256 | なし | **成功（[Build #1](BUILD-RESULT-001.md)）** |
 | B. boot | DTBパッケージの存在 | UART、rootfs mount、login | 未検証 |
 | C. network | ルートfs内の設定 | Ethernet/SSH疎通 | 未検証 |
 | D. display | DRM対応のカーネル設定 | HDMI、KMS mode、描画 | 未検証 |
@@ -14,6 +14,14 @@
 | F. browser | WPE/WEBGLビルド成立 | GLES/WebGL/WPEがGPUで動作 | 未検証 |
 
 **すべての実機項目はログや実測が得られるまで「未検証」**。CI成功を実機成功と記載しない。
+
+## 直近の進捗
+
+- **2026-10-18：CI初回ビルド成功。** Linux **6.18.57-current-arm64** と Ubuntu 24.04 Noble MinimalのSD用イメージ生成、xz検査、チェックサム、GitHub Release公開まで完了。
+- Release: [nano-noble-run-1](https://github.com/2rwa/tmp-jetson-nano/releases/tag/nano-noble-run-1)。圧縮後1.10GB、圧縮前約4.9GB。
+- **次の実験は実機UART起動**。Pi 3から115200bpsでログを取り、必要ならDTBの問題を特定する。
+- HDMI・Nouveau GPU・WebGLは未検証。完了扱いにしない。
+- [Build #1実測記録](BUILD-RESULT-001.md)
 
 ## 現在の方針
 
