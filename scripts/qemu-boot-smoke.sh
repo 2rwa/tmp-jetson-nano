@@ -36,17 +36,22 @@ sfdisk -d "$raw" | tee result/partitions.txt
 
 loop_dev=$(sudo losetup --find --partscan --read-only --show "$raw")
 sudo lsblk -p -o NAME,SIZE,FSTYPE,LABEL,PARTLABEL "$loop_dev" | tee -a result/partitions.txt
-root_dev=$(sudo lsblk -pnr -o NAME,LABEL "$loop_dev" | awk '$2=="armbi_root" {print $1; exit}')
-if [ -z "$root_dev" ]; then
-  root_dev=$(sudo lsblk -pnr -o NAME,FSTYPE "$loop_dev" | awk '$2=="ext4" {part=$1} END {print part}')
+# Loop partition FSTYPE/LABEL may be empty before udev probing on hosted runners.
+# Read the GPT directly; Armbian labels the root partition 'rootfs'.
+root_num=$(sfdisk --json "$raw" | jq -r '
+  ([.partitiontable.partitions | to_entries[] |
+    select(.value.name == "rootfs") | (.key + 1)] | first) // empty')
+if [ -z "$root_num" ] || ! [[ "$root_num" =~ ^[0-9]+$ ]]; then
+  echo "No GPT partition named rootfs found in the SD image" >&2
+  exit 2
 fi
-if [ -z "$root_dev" ]; then
-  echo "No ext4 root partition found in the image" >&2; exit 2
+root_dev="${loop_dev}p${root_num}"
+if [ ! -b "$root_dev" ]; then
+  echo "Missing expected partition device $root_dev" >&2
+  exit 2
 fi
-root_num="${root_dev##*p}"
-if ! [[ "$root_num" =~ ^[0-9]+$ ]]; then
-  echo "Unexpected partition path: $root_dev" >&2; exit 2
-fi
+# blkid runs directly on the partition rather than trusting stale lsblk/udev metadata.
+sudo blkid -p "$root_dev" | tee -a result/partitions.txt || true
 echo "Root partition: $root_dev (QEMU /dev/vda$root_num)" | tee -a result/image-info.txt
 
 sudo mount -o ro "$root_dev" extracted

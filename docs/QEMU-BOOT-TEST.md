@@ -40,3 +40,7 @@
 Actionsから「QEMU ARM64 boot smoke test」 → **Run workflow** → `release_tag` を指定（初期値 `nano-noble-run-1`）。自動的にもワークフロー/スクリプト変更コミット時に走る。従来のフルイメージ再ビルドは不要。
 
 参考: [QEMU Direct Linux Boot](https://www.qemu.org/docs/master/system/linuxboot.html) / [GitHub ARM64 runner](https://github.blog/changelog/2025-08-07-arm64-hosted-runners-for-public-repositories-are-now-generally-available/)。
+
+## 実行履歴
+
+- [Run #1](https://github.com/2rwa/tmp-jetson-nano/actions/runs/39080088095): アーカイブのダウンロード、SHA256一致、GPTを確認。GitHub ARMランナー上ではループデバイスのFSTYPE/LABELが空だったため、rootfs検出で終了。**QEMUはまだ起動しておらず、Linux起動失敗ではない。** GPTの `rootfs` パーティション名から番号を取得する方法へ修正し再実行。
