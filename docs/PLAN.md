@@ -19,7 +19,7 @@
 
 - **2026-10-18：CI初回ビルド成功。** Linux **6.18.57-current-arm64** と Ubuntu 24.04 Noble MinimalのSD用イメージ生成、xz検査、チェックサム、GitHub Release公開まで完了。
 - Release: [nano-noble-run-1](https://github.com/2rwa/tmp-jetson-nano/releases/tag/nano-noble-run-1)。圧縮後1.10GB、圧縮前約4.9GB。
-- **次の実験は実機UART起動**。Pi 3から115200bpsでログを取り、必要ならDTBの問題を特定する。
+- **次の実験はNIC/DHCPによるヘッドレス起動確認が先**。ping/DHCPが取れなければPi 3で115200bpsのUARTログを取り、必要ならDTBの問題を特定する。[NIC起動確認の詳細](NIC-BOOT-CHECK.md)
 - HDMI・Nouveau GPU・WebGLは未検証。完了扱いにしない。
 - [Build #1実測記録](BUILD-RESULT-001.md)
 
