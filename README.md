@@ -36,6 +36,7 @@
 - [Raspberry Pi 3 GPIO UART接続・ログ取得](docs/RPI3-UART.md)
 - [NIC/DHCP/pingからUARTなしで起動確認](docs/NIC-BOOT-CHECK.md)
 - [QEMU ARM64でkernel/rootfsを仮想起動するスモークテスト](docs/QEMU-BOOT-TEST.md)
+- [Jetson NanoとRaspberry PiのOSイメージ互換性](docs/PLATFORM-COMPATIBILITY.md)
 - [段階的な検証計画と判定基準](docs/PLAN.md)
 - [イメージ構築ワークフロー](.github/workflows/build.yml)
 - [Pages公開ワークフロー](.github/workflows/pages.yml)

@@ -29,6 +29,10 @@
 - 既存ReleaseをARM64のQEMU virtマシン上で起動する独立ジョブを追加。検証対象はLinuxカーネル・initramfs・rootfsで、**Jetson NanoのBootROM/DTB/NIC/HDMI/GPUをエミュレートしない**。
 - 判定結果は[QEMUのActions](https://github.com/2rwa/tmp-jetson-nano/actions/workflows/qemu-boot.yml)と診断artifactで確認する。詳細は[QEMUブートテスト](QEMU-BOOT-TEST.md)。
 
+## プラットフォーム互換性
+
+- [Jetson Nano と Raspberry Pi の起動方式・rootfs互換性](PLATFORM-COMPATIBILITY.md) を整理。QEMU virtでの成功はJetson NanoやRaspberry Piの実機起動を保証しない。
+
 ## 現在の方針
 
 - 最初はArmbianの \`BOARD=jetson-nano BRANCH=current RELEASE=noble BUILD_MINIMAL=yes\`。
