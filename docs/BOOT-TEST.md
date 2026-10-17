@@ -1,46 +1,53 @@
-# First-boot and GPU validation plan
+# Jetson Nano実機起動・GPU検証手順
 
-Target: original Jetson Nano Developer Kit 4GB, Ubuntu 24.04 (Noble), Armbian mainline **current** kernel. The actual kernel revision will be determined by the build output; it is **not pinned** to 6.18 yet.
+最終更新: 2026-10-18。対象: **初代Jetson Nano 4GB**、SDカード（64GBの手持ち）、Ubuntu 24.04 (Noble) + Armbian mainline/current。
 
-## Before flashing
+## 1. SDカードを書き込む前に
 
-- Save the original 64GB microSD contents or use a spare card. Do not destroy a working JetPack installation.
-- Locate the **experimental** `.img.xz` and `SHA256SUMS.txt` in [Releases](https://github.com/2rwa/tmp-jetson-nano/releases).
-- Verify `sha256sum -c SHA256SUMS.txt` in the download directory.
-- Confirm the correct device with `lsblk -o NAME,SIZE,MODEL,TYPE,MOUNTPOINTS`. Never guess a device path.
-- Use a suitable disk imaging utility to write the full `.img.xz` to the microSD, then sync/eject. Initial image partitions may expand at first boot.
-- Have a **3.3V USB-to-TTL UART** adapter available (not RS-232 voltage). Baud: **115200 8N1**.
+1. 元の64GB SDカードは必ずバックアップ、できれば **別のmicroSD** で試験する。
+2. [Actions](https://github.com/2rwa/tmp-jetson-nano/actions/workflows/build.yml) の完了状態を確認する。CIでイメージができても実機起動は別判定。
+3. [Releases](https://github.com/2rwa/tmp-jetson-nano/releases) の実験用 `.img.xz` と `SHA256SUMS.txt` を同じ場所にダウンロードする。
+4. 書き込む側のPCで `sha256sum -c SHA256SUMS.txt` を実行し、整合性を確認。
+5. `lsblk -o NAME,SIZE,MODEL,TYPE,MOUNTPOINTS` などで対象デバイスを確認。**デバイス名を推測してddを実行しない**。
+6. Etcherなどのイメージ書き込みツールで `.img.xz` をmicroSDに書き込む。起動時に領域拡張が発生する場合がある。
 
-## Boot milestones (report each separately)
+## 2. UART起動ログの取得
 
-| Stage | Evidence | Status |
+初期のLinux 6系移植ではHDMIが出ない可能性があるため、**UART接続を先に準備**する。
+
+- USB–TTLシリアル変換器は **3.3Vロジック**（RS-232電圧を接続しない）。
+- **115200 bps / 8N1** でログ取得。
+- ボードのリビジョン **A02/B01でUART接続位置が異なる**。ピン配置を現物とNVIDIA公式ユーザーガイドで必ず照合する。A02のJ44とB01のJ50を混同しない。
+- ボードからUSB–TTL変換器への給電線を安易に接続しない。通常、信号GND・TX・RXを正しく配線する。
+
+参考: [NVIDIA Jetson Nano Developer Kit User Guide](https://developer.download.nvidia.com/embedded/L4T/r32-3-1_Release_v1.0/Jetson_Nano_Developer_Kit_User_Guide.pdf)。
+
+```bash
+# シリアルデバイス名は接続環境に応じて確認する
+ls -l /dev/serial/by-id/ /dev/ttyUSB* 2>/dev/null
+# 例: screen。デバイスは実機に合わせる
+screen -L /dev/ttyUSB0 115200
+```
+
+## 3. 成功判定（CIと実機を混同しない）
+
+| 段階 | 必要な証拠 | 状態 |
 |---|---|---|
-| CI build and compressed image integrity | Actions run + SHA256SUMS.txt | not yet run |
-| UEFI / bootloader loads kernel | UART output | untested |
-| Kernel mounts rootfs | login prompt over UART | untested |
-| Ethernet / SSH | interface and link + login | untested |
-| HDMI + DRM/KMS | monitor + /dev/dri enumeration | untested |
-| Nouveau GPU initialization | dmesg / modinfo / renderer | untested |
-| OpenGL ES and WPE WebKit | hardware renderer + measured FPS | untested |
+| CI構築・xz完全性 | Actionsログ / SHA256SUMS | [最新Actionsを参照](https://github.com/2rwa/tmp-jetson-nano/actions/workflows/build.yml) |
+| UEFI/GRUBからLinux起動 | UARTログ | 未検証 |
+| rootfs mount / login | rootシェルと `uname -a` | 未検証 |
+| Ethernet / SSH | NIC認識・ログイン | 未検証 |
+| DRM / HDMI | `/dev/dri`、モード設定と目視 | 未検証 |
+| Nouveau GPU | dmesg、Mesa renderer、シェーダーFPS | 未検証 |
+| WPE WebKit / WebGL | ソフトウェア描画でないことを実測 | 未検証 |
 
-## Previously reported hardware-specific caveat
-
-A community developer booted Armbian 26.2.7 / Linux 6.18.29 with **Debian Trixie** on a Jetson Nano 4GB A02, using USB storage and UART. HDMI did **not** work in that report.
-
-Their boot failure `failed to get resets for venc: -517` was worked around by removing one reset dependency from the `venc` device-tree block, recompiling the DTB, and keeping a backup of the original. Do not apply the exact numeric phandles blindly: they depend on the DTB being edited.
-
-- [Detailed upstream reference](https://github.com/hillac/jetson-nano-armbian-build/blob/main/jetson-armbian-26.md)
-- [Earlier Armbian 23 / 6.1.50 experience, HDMI worked](https://github.com/hillac/jetson-nano-armbian-build/blob/main/jetson-armbian-23.md)
-
-If the first boot fails, collect complete UART output before changing the DTB or boot arguments.
-
-## Once logged in (read-only diagnostics)
+## 4. 起動できたら取得するログ
 
 ```bash
 uname -a
 cat /etc/os-release
-cat /proc/device-tree/model
-ls -l /dev/dri/ || true
+cat /proc/device-tree/model 2>/dev/null
+ls -l /dev/dri/ 2>/dev/null
 lsmod | grep -E 'nouveau|drm|tegra' || true
 dmesg | grep -Ei 'nouveau|drm|tegra|venc|firmware' | tail -n 100
 free -h
@@ -48,11 +55,14 @@ df -h
 ip -br addr
 ```
 
-Once the display stack is installed and initialized, compare `eglinfo`, `glmark2-es2`, `vulkaninfo` (if applicable) and `glxinfo -B` (only inside an X11 session). Reject software rendering (`llvmpipe`) as a GPU pass. `/dev/dri` and `lsmod` alone do not prove acceleration.
+GUI・EGLが稼働してから `eglinfo`、`glmark2-es2`、`glxinfo -B`（X11時のみ）、`vulkaninfo`（該当する場合）を確認する。`llvmpipe` などソフトウェアrendererでの成功をGPUハードウェア成功扱いしない。
 
-## Next changes after the baseline
+## 5. 先行事例とトラブルシューティング
 
-- Capture kernel SHA, DTS/DTB, GPU clocks and Mesa version in reproducible reports.
-- Add a targeted, version-specific `userpatches/` device-tree fix **after** boot log evidence.
-- Attempt HDMI first, then Nouveau acceleration and WPE WebKit.
-- Keep vendor L4T/CUDA and mainline Nouveau results clearly separated.
+- [hillac氏のJetson Nano 4GB / Armbian 26起動記録](https://github.com/hillac/jetson-nano-armbian-build/blob/main/jetson-armbian-26.md): Debian Trixie / Linux 6.18.29でUARTログイン成功、**HDMI未動作**。USBストレージ起動環境での検証であり、こちらのmicroSDとは条件が異なる。
+- この事例ではDTBの `venc` reset依存でエラー（`failed to get resets for venc: -517`）が発生し、DTBを書き換えて起動した。phandle数値はDTB固有で、異なるビルドへコピーしてよいとは限らない。
+- [Armbian 23 / Linux 6.1.50の旧事例](https://github.com/hillac/jetson-nano-armbian-build/blob/main/jetson-armbian-23.md): 最小イメージでHDMI表示成功の記録。ただし現在のカーネルでの成功を意味しない。
+
+**起動しない場合は、まずUART全ログと電源・ボードrevision・SD書き込みの情報を残す。** 変更パッチは実機ログに対応して最小限導入する。
+
+関連: [ビルド構成](BUILD-NOTES.md) / [進捗計画](PLAN.md)。
